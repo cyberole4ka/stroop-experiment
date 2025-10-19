@@ -693,52 +693,44 @@ function importConditions(currentLoop) {
     };
 }
 async function quitPsychoJS(message, isCompleted) {
-    // 1. Завершаем текущую запись данных, если нужно
-    try {
-        if (psychoJS.experiment.isEntryEmpty()) {
-            psychoJS.experiment.nextEntry();
-        }
-    } catch (err) {
-        console.warn("⚠️ Не удалось завершить текущую запись данных:", err);
+    // --- 1. Закрываем запись данных ---
+    if (psychoJS.experiment.isEntryEmpty()) {
+        psychoJS.experiment.nextEntry();
     }
 
-    // 2. Получаем CSV со всеми результатами, безопасно проверяя данные
-    let csvContent = "No data";  // дефолт, если данных нет
+    // --- 2. Получаем CSV со всеми результатами ---
+    let csvContent = "";
     try {
-        const allTrials = psychoJS.experiment._trials;
-        if (Array.isArray(allTrials) && allTrials.length > 0) {
-            csvContent = psychoJS.experiment.saveCSV({ returnData: true });
-        } else {
+        csvContent = psychoJS.experiment.saveCSV({returnData: true});
+        if (!csvContent || csvContent.trim() === "") {
             console.warn("⚠️ Нет данных для сохранения CSV");
         }
-    } catch (err) {
-        console.error("⚠️ Ошибка при генерации CSV:", err);
+    } catch (e) {
+        console.error("⚠️ Не удалось получить CSV из PsychoJS:", e);
     }
 
-    // 3. Отправка CSV на Google Drive
+    // --- 3. Отправляем CSV на Google Drive через Apps Script ---
     try {
-        await fetch(
-            "https://script.google.com/macros/s/AKfycbxR7Q1F-ryw3u1asS6AlmFo0MqFpxXBSpTuVzd9YUpvn-OChA7740PH0MsrT_lMTfFGpw/exec",
-            {
-                method: "POST",
-                body: csvContent,
-                headers: { "Content-Type": "text/csv" },
-            }
-        )
-            .then(r => r.text())
-            .then(result => console.log("✅ Отправлено на Google Drive:", result))
-            .catch(err => console.error("❌ Ошибка при fetch:", err));
+        const response = await fetch("ВАШ_URL_ВЕБ_ПРИЛОЖЕНИЯ", {
+            method: "POST",
+            mode: "cors",              // включаем CORS
+            cache: "no-cache",
+            headers: { "Content-Type": "text/csv" },
+            body: csvContent
+        });
+
+        if (!response.ok) {
+            throw new Error(`Сервер вернул статус ${response.status}`);
+        }
+
+        const resultText = await response.text();
+        console.log("✅ CSV успешно отправлен на Google Drive:", resultText);
     } catch (err) {
         console.error("❌ Ошибка при отправке CSV:", err);
     }
 
-    // 4. Закрываем окно и завершаем эксперимент
-    try {
-        psychoJS.window.close();
-        psychoJS.quit({ message: message, isCompleted: isCompleted });
-    } catch (err) {
-        console.error("❌ Ошибка при завершении PsychoJS:", err);
-    }
-
+    // --- 4. Закрываем эксперимент ---
+    psychoJS.window.close();
+    psychoJS.quit({message: message, isCompleted: isCompleted});
     return Scheduler.Event.QUIT;
 }
