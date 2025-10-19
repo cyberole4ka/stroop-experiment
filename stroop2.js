@@ -11,7 +11,7 @@ const { round } = util;
 
 // --- Google Sheets POST function ---
 async function sendToGoogleSheet(dataObj) {
-    const scriptURL = 'ВАША_ССЫЛКА_НА_WEB_APP'; // <- Вставьте сюда ссылку на Web App Google Apps Script
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbw9YxwBiVg1-yGT0GN285Jcjz95X-LPGy6utRC5Nyg9EAFjz_cvkXacXkUIT8rWKwk1/exec'; // <- Вставьте сюда ссылку на Web App Google Apps Script
     try {
         await fetch(scriptURL, {
             method: 'POST',
