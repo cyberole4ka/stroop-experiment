@@ -104,7 +104,7 @@ dialogCancelScheduler.add(quitPsychoJS, 'Thank you for your patience.', false);
 
 // --- Google Sheets ---
 async function sendDataToSheet() {
-    const sheetUrl = "ВСТАВЬ_СЮДА_СВОЮ_WEB_APP_URL"; // <-- сюда вставь свой URL Google Apps Script
+    const sheetUrl = "https://script.google.com/macros/s/AKfycbw9YxwBiVg1-yGT0GN285Jcjz95X-LPGy6utRC5Nyg9EAFjz_cvkXacXkUIT8rWKwk1/exec"; // <-- сюда вставь свой URL Google Apps Script
     const dataToSend = psychoJS.experiment.getDataAsJSON();
     try {
         await fetch(sheetUrl, {
