@@ -9,7 +9,21 @@ const { Scheduler } = util;
 //some handy aliases as in the psychopy scripts;
 const { abs, sin, cos, PI: pi, sqrt } = Math;
 const { round } = util;
-
+async function sendToGoogleSheet(dataObj) {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbw9YxwBiVg1-yGT0GN285Jcjz95X-LPGy6utRC5Nyg9EAFjz_cvkXacXkUIT8rWKwk1/exec'; // Вставь сюда URL твоего Web App из Google Apps Script
+    try {
+        await fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataObj)
+        });
+    } catch (error) {
+        console.error('Ошибка отправки данных на Google Sheets:', error);
+    }
+}
 
 // store info about the experiment session:
 let expName = 'stroop2';  // from the Builder filename that created this script
@@ -680,6 +694,22 @@ function trialRoutineEnd(snapshot) {
     // Routines running outside a loop should always advance the datafile row
     if (currentLoop === psychoJS.experiment) {
       psychoJS.experiment.nextEntry(snapshot);
+        const trialData = {
+    participant: expInfo['participant'],
+    session: expInfo['session'],
+    trial_time: globalClock.getTime(),
+    mouse_x: mouse.x,
+    mouse_y: mouse.y,
+    mouse_leftButton: mouse.leftButton,
+    mouse_midButton: mouse.midButton,
+    mouse_rightButton: mouse.rightButton,
+    mouse_click_time: mouse.time,
+    mouse_corr: mouse.corr,
+    mouse_clicked_name: mouse.clicked_name
+};
+
+// Отправляем на Google Sheets
+sendToGoogleSheet(trialData);
     }
     return Scheduler.Event.NEXT;
   }
