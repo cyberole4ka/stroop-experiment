@@ -5,42 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Stroop Experiment [PsychoPy]</title>
 
-  <!-- стили -->
+  <!-- Стили -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.css">
   <link rel="stylesheet" href="lib/psychojs-2025.1.1.css">
-
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: black;
-    }
-    #root {
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-  </style>
 </head>
 
 <body>
   <div id="root"></div>
 
-  <!-- внешние библиотеки -->
+  <!-- Внешние библиотеки -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/preloadjs@1.0.1/lib/preloadjs.min.js"></script>
 
-  <!-- для современных браузеров -->
+  <!-- Для современных браузеров -->
   <script type="module">
     import "./lib/psychojs-2025.1.1.js";
     import "./stroop2.js";
   </script>
 
-  <!-- для старых браузеров -->
+  <!-- Для старых браузеров -->
   <script nomodule src="lib/psychojs-2025.1.1.iife.js"></script>
   <script nomodule src="stroop2-legacy-browsers.js"></script>
 </body>
