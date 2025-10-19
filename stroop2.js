@@ -2,130 +2,127 @@
  * Stroop2 *
  ****************/
 
-import { core, data, sound, util, visual, hardware } from './lib/psychojs-2025.1.1.js';
+import { core, data, util, visual } from './lib/psychojs-2025.1.1.js';
 const { PsychoJS } = core;
-const { TrialHandler, MultiStairHandler } = data;
+const { TrialHandler } = data;
 const { Scheduler } = util;
-const { abs, sin, cos, PI: pi, sqrt } = Math;
-const { round } = util;
 
-// --- Google Sheets POST function ---
-async function sendToGoogleSheet(dataObj) {
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbw9YxwBiVg1-yGT0GN285Jcjz95X-LPGy6utRC5Nyg9EAFjz_cvkXacXkUIT8rWKwk1/exec'; // <- Вставьте сюда ссылку на Web App Google Apps Script
-    try {
-        await fetch(scriptURL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dataObj)
-        });
-    } catch (error) {
-        console.error('Ошибка отправки данных на Google Sheets:', error);
-    }
-}
-
-// store info about the experiment session:
-let expName = 'stroop2';  
+// --- Экспериментальная информация ---
+let expName = 'stroop2';
 let expInfo = {
     'participant': `${util.pad(Number.parseFloat(util.randint(0, 999999)).toFixed(0), 6)}`,
     'session': '001',
 };
-let PILOTING = util.getUrlParameters().has('__pilotToken');
 
-// Start code blocks for 'Before Experiment'
+// Инициализация PsychoJS
 const psychoJS = new PsychoJS({ debug: true });
-
-// open window:
 psychoJS.openWindow({
-  fullscr: true,
-  color: new util.Color([1.0, 1.0, 1.0]),
-  units: 'height',
-  waitBlanking: true,
-  backgroundImage: '',
-  backgroundFit: 'none',
+    fullscr: true,
+    color: new util.Color([1, 1, 1]),
+    units: 'height',
+    waitBlanking: true,
 });
 
-// schedule the experiment:
+// --- Диалоговое окно участника ---
 psychoJS.schedule(psychoJS.gui.DlgFromDict({
-  dictionary: expInfo,
-  title: expName
+    dictionary: expInfo,
+    title: expName
 }));
 
 const flowScheduler = new Scheduler(psychoJS);
 const dialogCancelScheduler = new Scheduler(psychoJS);
-psychoJS.scheduleCondition(function() { return (psychoJS.gui.dialogComponent.button === 'OK'); }, flowScheduler, dialogCancelScheduler);
 
+psychoJS.scheduleCondition(
+    () => psychoJS.gui.dialogComponent.button === 'OK',
+    flowScheduler,
+    dialogCancelScheduler
+);
+
+// --- Update Info ---
+async function updateInfo() {
+    expInfo['date'] = util.MonotonicClock.getDateStr();
+    expInfo['expName'] = expName;
+    expInfo['psychopyVersion'] = '2025.1.1';
+    expInfo['OS'] = window.navigator.platform;
+    expInfo['frameRate'] = psychoJS.window.getActualFrameRate();
+    psychoJS.experiment.dataFileName = `data/${expInfo["participant"]}_${expName}_${expInfo["date"]}`;
+    psychoJS.experiment.field_separator = '\t';
+    return Scheduler.Event.NEXT;
+}
+
+// --- Переменные эксперимента ---
+var InstrukcjaClock, Instrukcja_text, mouse_2;
+var trialClock, text, img_red, img_green, img_blue, img_yellow, mouse;
+var globalClock, routineTimer;
+var trials;
+
+// --- Инициализация эксперимента ---
+async function experimentInit() {
+    // --- Instrukcja ---
+    InstrukcjaClock = new util.Clock();
+    Instrukcja_text = new visual.TextStim({
+        win: psychoJS.window,
+        name: 'Instrukcja_text',
+        text: 'W teście pojawi się 6 słów w języku polskim i 6 w języku angielskim. Wybierz KOLOR, odpowiadający znaczeniu słowa. \n\n\n*kliknij żeby zacząć*',
+        font: 'Arial',
+        units: undefined, pos: [0, 0], height: 0.05,
+        color: new util.Color([-1, -1, -1])
+    });
+    mouse_2 = new core.Mouse({ win: psychoJS.window });
+    mouse_2.mouseClock = new util.Clock();
+
+    // --- Trial ---
+    trialClock = new util.Clock();
+    text = new visual.TextStim({ win: psychoJS.window, name: 'text', text: '', font: 'Arial', pos: [0,0], height: 0.15, color: new util.Color('white') });
+    img_red = new visual.ImageStim({ win: psychoJS.window, name: 'img_red', image: 'Kolory/red.png', pos: [-0.5,0.4], size:[0.3,0.3] });
+    img_green = new visual.ImageStim({ win: psychoJS.window, name: 'img_green', image: 'Kolory/green.png', pos: [0.5,0.4], size:[0.3,0.3] });
+    img_blue = new visual.ImageStim({ win: psychoJS.window, name: 'img_blue', image: 'Kolory/blue.png', pos: [-0.5,-0.4], size:[0.3,0.3] });
+    img_yellow = new visual.ImageStim({ win: psychoJS.window, name: 'img_yellow', image: 'Kolory/yellow.png', pos: [0.5,-0.4], size:[0.3,0.3] });
+    mouse = new core.Mouse({ win: psychoJS.window });
+    mouse.mouseClock = new util.Clock();
+
+    globalClock = new util.Clock();
+    routineTimer = new util.CountdownTimer();
+    return Scheduler.Event.NEXT;
+}
+
+// --- Scheduler ---
 flowScheduler.add(updateInfo);
 flowScheduler.add(experimentInit);
 flowScheduler.add(InstrukcjaRoutineBegin());
 flowScheduler.add(InstrukcjaRoutineEachFrame());
 flowScheduler.add(InstrukcjaRoutineEnd());
+
 const trialsLoopScheduler = new Scheduler(psychoJS);
 flowScheduler.add(trialsLoopBegin(trialsLoopScheduler));
 flowScheduler.add(trialsLoopScheduler);
 flowScheduler.add(trialsLoopEnd);
 
+flowScheduler.add(sendDataToSheet); // отправка данных на Google Sheets
 flowScheduler.add(quitPsychoJS, 'Thank you for your patience.', true);
 dialogCancelScheduler.add(quitPsychoJS, 'Thank you for your patience.', false);
 
-psychoJS.start({
-  expName: expName,
-  expInfo: expInfo,
-  resources: [
-    {'name': 'stroop.csv', 'path': 'stroop.csv'},
-    {'name': 'Kolory/red.png', 'path': 'Kolory/red.png'},
-    {'name': 'Kolory/green.png', 'path': 'Kolory/green.png'},
-    {'name': 'Kolory/blue.png', 'path': 'Kolory/blue.png'},
-    {'name': 'Kolory/yellow.png', 'path': 'Kolory/yellow.png'},
-  ]
-});
-
-psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.INFO);
-
-// ... Здесь весь остальной код эксперимента без изменений ...
-
-// В функции trialRoutineEnd добавляем отправку данных на Google Sheets
-function trialRoutineEnd(snapshot) {
-  return async function () {
-    for (const thisComponent of trialComponents) {
-      if (typeof thisComponent.setAutoDraw === 'function') {
-        thisComponent.setAutoDraw(false);
-      }
+// --- Google Sheets ---
+async function sendDataToSheet() {
+    const sheetUrl = "ВСТАВЬ_СЮДА_СВОЮ_WEB_APP_URL"; // <-- сюда вставь свой URL Google Apps Script
+    const dataToSend = psychoJS.experiment.getDataAsJSON();
+    try {
+        await fetch(sheetUrl, {
+            method: 'POST',
+            body: JSON.stringify(dataToSend),
+            headers: { "Content-Type": "application/json" }
+        });
+        console.log("Data sent to Google Sheets successfully.");
+    } catch (error) {
+        console.error("Error sending data to Google Sheets:", error);
     }
-    psychoJS.experiment.addData('trial.stopped', globalClock.getTime());
-    psychoJS.experiment.addData('mouse.x', mouse.x);
-    psychoJS.experiment.addData('mouse.y', mouse.y);
-    psychoJS.experiment.addData('mouse.leftButton', mouse.leftButton);
-    psychoJS.experiment.addData('mouse.midButton', mouse.midButton);
-    psychoJS.experiment.addData('mouse.rightButton', mouse.rightButton);
-    psychoJS.experiment.addData('mouse.time', mouse.time);
-    psychoJS.experiment.addData('mouse.corr', mouse.corr);
-    psychoJS.experiment.addData('mouse.clicked_name', mouse.clicked_name);
-
-    routineTimer.reset();
-
-    if (currentLoop === psychoJS.experiment) {
-      psychoJS.experiment.nextEntry(snapshot);
-    }
-
-    // --- Отправка данных на Google Sheets ---
-    const trialData = {
-        participant: expInfo['participant'],
-        session: expInfo['session'],
-        trial_time: globalClock.getTime(),
-        mouse_x: mouse.x,
-        mouse_y: mouse.y,
-        mouse_leftButton: mouse.leftButton,
-        mouse_midButton: mouse.midButton,
-        mouse_rightButton: mouse.rightButton,
-        mouse_click_time: mouse.time,
-        mouse_corr: mouse.corr,
-        mouse_clicked_name: mouse.clicked_name
-    };
-    sendToGoogleSheet(trialData);
-
     return Scheduler.Event.NEXT;
-  }
+}
+
+// --- Quit ---
+async function quitPsychoJS(message, isCompleted) {
+    if (psychoJS.experiment.isEntryEmpty()) psychoJS.experiment.nextEntry();
+    psychoJS.window.close();
+    psychoJS.quit({message, isCompleted});
+    return Scheduler.Event.QUIT;
 }
