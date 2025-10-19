@@ -692,15 +692,31 @@ function importConditions(currentLoop) {
     return Scheduler.Event.NEXT;
     };
 }
-
-
 async function quitPsychoJS(message, isCompleted) {
-  // Check for and save orphaned data
-  if (psychoJS.experiment.isEntryEmpty()) {
-    psychoJS.experiment.nextEntry();
-  }
-  psychoJS.window.close();
-  psychoJS.quit({message: message, isCompleted: isCompleted});
-  
-  return Scheduler.Event.QUIT;
+    // --- 1. Закрываем запись данных ---
+    if (psychoJS.experiment.isEntryEmpty()) {
+        psychoJS.experiment.nextEntry();
+    }
+
+    // --- 2. Получаем CSV со всеми результатами ---
+    let csvContent = "";
+    try {
+        csvContent = psychoJS.experiment.saveCSV({ returnData: true });
+    } catch (e) {
+        console.error(" Не удалось получить CSV из PsychoJS:", e);
+    }
+
+    // --- 3. Сохраняем локально через FileSaver.js ---
+    try {
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        saveAs(blob, `results_${expInfo.participant}.csv`);
+        console.log("CSV сохранён локально");
+    } catch (err) {
+        console.error(" Ошибка при сохранении CSV:", err);
+    }
+
+    // --- 4. Завершаем эксперимент ---
+    psychoJS.window.close();
+    psychoJS.quit({ message: message, isCompleted: isCompleted });
+    return Scheduler.Event.QUIT;
 }
