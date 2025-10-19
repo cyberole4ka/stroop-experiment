@@ -9,9 +9,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.css">
   <link rel="stylesheet" href="lib/psychojs-2025.1.1.css">
 
-  <!-- улучшение совместимости с мобильными -->
   <style>
-    body, html {
+    html, body {
       margin: 0;
       padding: 0;
       width: 100%;
@@ -22,7 +21,7 @@
     #root {
       width: 100%;
       height: 100%;
-      touch-action: none; /* чтобы касания не вызывали зум */
+      touch-action: none;
     }
   </style>
 </head>
@@ -35,14 +34,14 @@
   <script src="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/preloadjs@1.0.1/lib/preloadjs.min.js"></script>
 
-  <!-- библиотека PsychoJS -->
+  <!-- для современных браузеров -->
   <script type="module">
     import "./lib/psychojs-2025.1.1.js";
     import "./stroop2.js";
   </script>
 
-  <!-- поддержка для старых браузеров -->
+  <!-- для старых браузеров -->
   <script nomodule src="lib/psychojs-2025.1.1.iife.js"></script>
-  <script nomodule src="./stroop2-legacy-browsers.js"></script>
+  <script nomodule src="stroop2-legacy-browsers.js"></script>
 </body>
 </html>
