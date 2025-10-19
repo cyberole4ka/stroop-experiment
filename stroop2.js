@@ -693,35 +693,52 @@ function importConditions(currentLoop) {
     };
 }
 async function quitPsychoJS(message, isCompleted) {
-  // --- 1. Закрываем запись данных ---
-  if (psychoJS.experiment.isEntryEmpty()) {
-    psychoJS.experiment.nextEntry();
-  }
+    // 1. Завершаем текущую запись данных, если нужно
+    try {
+        if (psychoJS.experiment.isEntryEmpty()) {
+            psychoJS.experiment.nextEntry();
+        }
+    } catch (err) {
+        console.warn("⚠️ Не удалось завершить текущую запись данных:", err);
+    }
 
-  // --- 2. Получаем CSV со всеми результатами ---
-  let csvContent = "";
-  try {
-    csvContent = psychoJS.experiment.saveCSV({returnData: true});
-  } catch (e) {
-    console.error("⚠️ Не удалось получить CSV из PsychoJS:", e);
-  }
+    // 2. Получаем CSV со всеми результатами, безопасно проверяя данные
+    let csvContent = "No data";  // дефолт, если данных нет
+    try {
+        const allTrials = psychoJS.experiment._trials;
+        if (Array.isArray(allTrials) && allTrials.length > 0) {
+            csvContent = psychoJS.experiment.saveCSV({ returnData: true });
+        } else {
+            console.warn("⚠️ Нет данных для сохранения CSV");
+        }
+    } catch (err) {
+        console.error("⚠️ Ошибка при генерации CSV:", err);
+    }
 
-  // --- 3. Отправляем CSV на Google Drive ---
-  try {
-    await fetch("https://script.google.com/macros/s/AKfycbwO_kNufB-AmnWysvSqEqvAwsPVtz5F0Uv7xG1lEQZt0VexOvqPtgIm_unl8GVhNybKoA/exec", {
-      method: "POST",
-      body: csvContent,
-      headers: { "Content-Type": "text/csv" }
-    })
-    .then(r => r.text())
-    .then(result => console.log("✅ Отправлено на Google Drive:", result))
-    .catch(err => console.error("❌ Ошибка при fetch:", err));
-  } catch (err) {
-    console.error("❌ Ошибка при отправке:", err);
-  }
+    // 3. Отправка CSV на Google Drive
+    try {
+        await fetch(
+            "https://script.google.com/macros/s/AKfycbwO_kNufB-AmnWysvSqEqvAwsPVtz5F0Uv7xG1lEQZt0VexOvqPtgIm_unl8GVhNybKoA/exec",
+            {
+                method: "POST",
+                body: csvContent,
+                headers: { "Content-Type": "text/csv" },
+            }
+        )
+            .then(r => r.text())
+            .then(result => console.log("✅ Отправлено на Google Drive:", result))
+            .catch(err => console.error("❌ Ошибка при fetch:", err));
+    } catch (err) {
+        console.error("❌ Ошибка при отправке CSV:", err);
+    }
 
-  // --- 4. Завершаем эксперимент ---
-  psychoJS.window.close();
-  psychoJS.quit({message: message, isCompleted: isCompleted});
-  return Scheduler.Event.QUIT;
+    // 4. Закрываем окно и завершаем эксперимент
+    try {
+        psychoJS.window.close();
+        psychoJS.quit({ message: message, isCompleted: isCompleted });
+    } catch (err) {
+        console.error("❌ Ошибка при завершении PsychoJS:", err);
+    }
+
+    return Scheduler.Event.QUIT;
 }
