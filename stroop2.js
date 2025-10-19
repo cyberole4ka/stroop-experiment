@@ -693,15 +693,18 @@ function importConditions(currentLoop) {
     };
 }
 async function quitPsychoJS(message, isCompleted) {
-  // --- 1. Завершаем запись данных ---
+  // --- 1. Закрываем запись данных ---
   if (psychoJS.experiment.isEntryEmpty()) {
     psychoJS.experiment.nextEntry();
   }
 
-  // --- 2. Преобразуем данные в CSV ---
-  const csvContent = psychoJS.experiment.extraInfo['participant'] + "\n" +
-    psychoJS.experiment.dataFileName + "\n\n" +
-    psychoJS.experiment._trials.map(t => Object.values(t).join(",")).join("\n");
+  // --- 2. Получаем CSV со всеми результатами ---
+  let csvContent = "";
+  try {
+    csvContent = psychoJS.experiment.saveCSV({returnData: true});
+  } catch (e) {
+    console.error("⚠️ Не удалось получить CSV из PsychoJS:", e);
+  }
 
   // --- 3. Отправляем CSV на Google Drive ---
   try {
@@ -711,15 +714,14 @@ async function quitPsychoJS(message, isCompleted) {
       headers: { "Content-Type": "text/csv" }
     })
     .then(r => r.text())
-    .then(result => console.log(" Отправлено на Google Drive:", result))
-    .catch(err => console.error(" Ошибка отправки:", err));
+    .then(result => console.log("✅ Отправлено на Google Drive:", result))
+    .catch(err => console.error("❌ Ошибка при fetch:", err));
   } catch (err) {
-    console.error(" Ошибка при fetch:", err);
+    console.error("❌ Ошибка при отправке:", err);
   }
 
-  // --- 4. Завершаем эксперимент как обычно ---
+  // --- 4. Завершаем эксперимент ---
   psychoJS.window.close();
   psychoJS.quit({message: message, isCompleted: isCompleted});
-
   return Scheduler.Event.QUIT;
 }
