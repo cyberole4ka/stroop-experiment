@@ -693,44 +693,34 @@ function importConditions(currentLoop) {
     };
 }
 async function quitPsychoJS(message, isCompleted) {
-    // --- 1. Закрываем запись данных ---
-    if (psychoJS.experiment.isEntryEmpty()) {
-        psychoJS.experiment.nextEntry();
-    }
+  // 1. Закрываем запись данных
+  if (psychoJS.experiment.isEntryEmpty()) {
+    psychoJS.experiment.nextEntry();
+  }
 
-    // --- 2. Получаем CSV со всеми результатами ---
-    let csvContent = "";
-    try {
-        csvContent = psychoJS.experiment.saveCSV({returnData: true});
-        if (!csvContent || csvContent.trim() === "") {
-            console.warn("⚠️ Нет данных для сохранения CSV");
-        }
-    } catch (e) {
-        console.error("⚠️ Не удалось получить CSV из PsychoJS:", e);
-    }
+  // 2. Получаем CSV со всеми результатами
+  let csvContent = "";
+  try {
+    csvContent = psychoJS.experiment.saveCSV({ returnData: true });
+  } catch (e) {
+    console.error("⚠️ Не удалось получить CSV из PsychoJS:", e);
+  }
 
-    // --- 3. Отправляем CSV на Google Drive через Apps Script ---
-    try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbzAGtufL7ON0bOjPFIJ26uFLQpUpzq6B44NBRBIjcVAKsVF5bvxPNVSfhCTVRwrN5ZzBA/exec", {
-            method: "POST",
-            mode: "cors",              // включаем CORS
-            cache: "no-cache",
-            headers: { "Content-Type": "text/csv" },
-            body: csvContent
-        });
+  // 3. Отправляем CSV на Google Apps Script
+  try {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbwcOzJawyi_xRbCP15GlQ9kS-hvvOILcxHw0PiKDSQLsRgtukLVvDxk0jQKD3f7rofxmQ/exec", {
+      method: "POST",
+      body: csvContent,
+      headers: { "Content-Type": "text/plain" } // обязательно
+    });
+    const result = await response.text();
+    console.log("✅ Отправлено на Google Drive:", result);
+  } catch (err) {
+    console.error("❌ Ошибка при отправке:", err);
+  }
 
-        if (!response.ok) {
-            throw new Error(`Сервер вернул статус ${response.status}`);
-        }
-
-        const resultText = await response.text();
-        console.log("✅ CSV успешно отправлен на Google Drive:", resultText);
-    } catch (err) {
-        console.error("❌ Ошибка при отправке CSV:", err);
-    }
-
-    // --- 4. Закрываем эксперимент ---
-    psychoJS.window.close();
-    psychoJS.quit({message: message, isCompleted: isCompleted});
-    return Scheduler.Event.QUIT;
+  // 4. Завершаем эксперимент
+  psychoJS.window.close();
+  psychoJS.quit({ message: message, isCompleted: isCompleted });
+  return Scheduler.Event.QUIT;
 }
