@@ -711,7 +711,7 @@ async function quitPsychoJS(message, isCompleted) {
 
     // --- 3. Отправляем CSV на Google Drive через Apps Script ---
     try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbwcKu8-LkJRoZ2VpTy1AKQT461fntTCOB2-pY2JRe1x3DMImLI_2j_VnHbV-MOWagsV4A/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzAGtufL7ON0bOjPFIJ26uFLQpUpzq6B44NBRBIjcVAKsVF5bvxPNVSfhCTVRwrN5ZzBA/exec", {
             method: "POST",
             mode: "cors",              // включаем CORS
             cache: "no-cache",
