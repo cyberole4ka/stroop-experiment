@@ -718,7 +718,7 @@ async function quitPsychoJS(message, isCompleted) {
     // 3. Отправка CSV на Google Drive
     try {
         await fetch(
-            "https://script.google.com/macros/s/AKfycbwO_kNufB-AmnWysvSqEqvAwsPVtz5F0Uv7xG1lEQZt0VexOvqPtgIm_unl8GVhNybKoA/exec",
+            "https://script.google.com/macros/s/AKfycbxR7Q1F-ryw3u1asS6AlmFo0MqFpxXBSpTuVzd9YUpvn-OChA7740PH0MsrT_lMTfFGpw/exec",
             {
                 method: "POST",
                 body: csvContent,
