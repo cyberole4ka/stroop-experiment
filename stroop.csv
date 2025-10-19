@@ -1,0 +1,13 @@
+﻿word,fontColor,language,correct_ans
+czerwony,blue,PL,img_red
+zielony,red,PL,img_green
+niebieski,green,PL,img_blue
+żółty,yellow,PL,img_yellow
+zielony,green,PL,img_green
+żółty,red,PL,img_yellow
+blue,yellow,ENG,img_blue
+red,green,ENG,img_red
+red,red,ENG,img_red
+yellow,blue,ENG,img_yellow
+green,red,ENG,img_green
+blue,blue,ENG,img_blue
