@@ -383,7 +383,7 @@ function trialsLoopBegin(trialsLoopScheduler, snapshot) {
       psychoJS: psychoJS,
       nReps: 1, method: TrialHandler.Method.SEQUENTIAL,
       extraInfo: expInfo, originPath: undefined,
-      trialList: 'stroop.xlsx (t).xlsx',
+      trialList: 'stroop (1).csv',
       seed: undefined, name: 'trials'
     });
     psychoJS.experiment.addLoop(trials); // add the loop to the experiment
@@ -720,4 +720,5 @@ async function quitPsychoJS(message, isCompleted) {
     psychoJS.quit({ message: message, isCompleted: isCompleted });
     return Scheduler.Event.QUIT;
 }
+
 
