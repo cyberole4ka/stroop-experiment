@@ -66,7 +66,7 @@ psychoJS.start({
   expInfo: expInfo,
   resources: [
     // resources:
-    {'name': 'stroop.xlsx (t).xlsx', 'path': 'stroop.xlsx (t).xlsx'},
+    {'name': 'stroop (1).csv', 'path': 'stroop (1).csv'},
     {'name': 'Kolory/red.png', 'path': 'Kolory/red.png'},
     {'name': 'Kolory/green.png', 'path': 'Kolory/green.png'},
     {'name': 'Kolory/blue.png', 'path': 'Kolory/blue.png'},
@@ -720,3 +720,4 @@ async function quitPsychoJS(message, isCompleted) {
     psychoJS.quit({ message: message, isCompleted: isCompleted });
     return Scheduler.Event.QUIT;
 }
+
